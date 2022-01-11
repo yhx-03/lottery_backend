@@ -94,43 +94,6 @@ public class LotteryServiceImpl implements LotteryService {
         }
         return lotteryItem;
     }
-    // struct {
-    //
-    // }
-    //git remote add origin https://github.com/XX/XX
-    //git push -u origin master
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
 
     /**
      * @Author yhx
