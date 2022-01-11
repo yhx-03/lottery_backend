@@ -62,6 +62,7 @@ public class LotteryServiceImpl implements LotteryService {
         //说明还未加载到缓存中，同步从数据库加载，并且异步将数据缓存
         if (lotteryItemsObj == null) {
             lotteryItems = lotteryMapper.selectByActivityIdLotteries(activityId);
+            redisTemplate.opsForValue().set("lotteries", lotteryItems);
         } else {
             lotteryItems = (List<Lottery>) lotteryItemsObj;
         }

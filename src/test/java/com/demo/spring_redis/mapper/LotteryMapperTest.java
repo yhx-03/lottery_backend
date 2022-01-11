@@ -51,4 +51,10 @@ class LotteryMapperTest {
         List<Lottery> lotteries = lotteryMapper.selectByActivityIdLotteries(1L);
         log.info(lotteries.toString());
     }
+
+    @Test
+    void testSelectByActivityIdLotteries() {
+        List<Lottery> lottery = lotteryMapper.selectByActivityIdLotteries(1L);
+        log.info(String.valueOf(lottery));
+    }
 }

@@ -1,5 +1,6 @@
 package com.demo.spring_redis.service.impl;
 
+import com.demo.spring_redis.entity.Lottery;
 import com.demo.spring_redis.entity.LotteryRecord;
 import com.demo.spring_redis.entity.LotteryUser;
 import com.demo.spring_redis.service.LotteryService;
@@ -19,7 +20,7 @@ import java.util.List;
 class LotteryServiceImplTest {
 
     @Autowired
-    LotteryService lotteryService;
+    LotteryServiceImpl lotteryService;
     @Autowired
     RedisTemplate redisTemplate;
 
@@ -38,14 +39,15 @@ class LotteryServiceImplTest {
     }
 
     @Test
-    void aaa() {
-        Object o = redisTemplate.opsForValue().getAndDelete("a");
-        System.out.println(o);
-    }
-
-    @Test
     void selectAllLotteryUser() {
         List<LotteryRecord> lotteryRecords = lotteryService.selectAllLotteryUser(1L);
         log.info(lotteryRecords.toString());
     }
+
+    @Test
+    void lotteryOnePrize() {
+        Lottery lottery = lotteryService.LotteryOnePrize(1L);
+        log.info(String.valueOf(lottery));
+    }
+
 }

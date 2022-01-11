@@ -2,6 +2,7 @@ package com.demo.spring_redis.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Objects;
  * @Date 16:10 2022/1/6
  **/
 @TableName("lottery")
-public class Lottery {
+public class Lottery implements Serializable {
 
     private Long id;
     private Long activityId;
