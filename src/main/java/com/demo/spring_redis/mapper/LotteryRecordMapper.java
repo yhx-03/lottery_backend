@@ -13,4 +13,6 @@ public interface LotteryRecordMapper extends BaseMapper<LotteryRecord> {
 
     List<LotteryRecord> selectByActivityIdLotteryRecord(Long activityId);
 
+    LotteryRecord selectByActivityIdAndUserIdLotteryRecord(Long activityId, Long userId);
+
 }

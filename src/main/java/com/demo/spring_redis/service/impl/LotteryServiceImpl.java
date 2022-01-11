@@ -32,6 +32,8 @@ public class LotteryServiceImpl implements LotteryService {
     @Autowired
     LotteryMapper lotteryMapper;
     @Autowired
+    LotteryUser
+    @Autowired
     AsyncService asyncService;
 
     private static final int mulriple = 10000;
@@ -46,6 +48,12 @@ public class LotteryServiceImpl implements LotteryService {
      **/
     @Override
     public Lottery userLottery(Long userId, Long activityId) {
+        // 判断用户是否参与抽奖
+        LotteryRecord lotteryRecord = lotteryRecordMapper.selectByActivityIdAndUserIdLotteryRecord(activityId, userId);
+        if(lotteryRecord != null){
+            lotteryRecord.get
+        }
+
         // 抽奖逻辑
         Lottery lottery = LotteryOnePrize(activityId);
 
@@ -59,7 +67,7 @@ public class LotteryServiceImpl implements LotteryService {
         Lottery lotteryItem = null;
         Object lotteryItemsObj = redisTemplate.opsForValue().get("lotteries");
         List<Lottery> lotteryItems;
-        //说明还未加载到缓存中，同步从数据库加载，并且异步将数据缓存
+        // 说明还未加载到缓存中，同步从数据库加载，并且异步将数据缓存
         if (lotteryItemsObj == null) {
             lotteryItems = lotteryMapper.selectByActivityIdLotteries(activityId);
             redisTemplate.opsForValue().set("lotteries", lotteryItems);
@@ -67,15 +75,17 @@ public class LotteryServiceImpl implements LotteryService {
             lotteryItems = (List<Lottery>) lotteryItemsObj;
         }
         int lastScope = 0;
-        //将数组随机打乱
+        // 将数组随机打乱
         Collections.shuffle(lotteryItems);
+        // 构造抽奖区间
         Map<Long, int[]> awardItemScope = new HashMap<>();
-        //item.getProb()=50 (50 / 10000 = 0.005)
+        // item.getProb()=50 (50 / 10000 = 0.005)
         for (Lottery item : lotteryItems) {
             int currentScope = lastScope + new BigDecimal(item.getProb().toString()).intValue();
             awardItemScope.put(item.getId(), new int[]{lastScope + 1, currentScope});
             lastScope = currentScope;
         }
+        // 产生中奖随机数并抽奖
         int luckyNumber = new Random().nextInt(mulriple);
         Long luckyPrizeId = 0L;
         if (!awardItemScope.isEmpty()) {
@@ -87,6 +97,7 @@ public class LotteryServiceImpl implements LotteryService {
                 }
             }
         }
+        //获得抽奖奖项
         for (Lottery item : lotteryItems) {
             if (item.getId().intValue() == luckyPrizeId) {
                 lotteryItem = item;

@@ -13,5 +13,9 @@
     <select id="selectByActivityIdLotteryRecord" resultType="com.demo.spring_redis.entity.LotteryRecord">
         select * from lottery_record where activity_id = #{activityId}
     </select>
+    <select id="selectByActivityIdAndUserIdLotteryRecord"
+            resultType="com.demo.spring_redis.entity.LotteryRecord">
+        select * from lottery_record where activity_id = #{activityId} and user_id = #{userId}
+    </select>
 
 </mapper>
