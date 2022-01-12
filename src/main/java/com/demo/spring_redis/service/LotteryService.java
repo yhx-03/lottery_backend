@@ -13,7 +13,7 @@ import java.util.List;
  **/
 public interface LotteryService {
 
-    List<LotteryUser> selectAll(Long activityId);
+//    List<LotteryUser> selectAll(Long activityId);
 
     Lottery userLottery(Long userId, Long activityId);
 

@@ -57,4 +57,12 @@ class LotteryMapperTest {
         List<Lottery> lottery = lotteryMapper.selectByActivityIdLotteries(1L);
         log.info(String.valueOf(lottery));
     }
+
+    @Test
+    void getEntireLotteryName() {
+        Long activityId = 2L;
+
+        log.info(lotteryMapper.getEntireLotteryName(activityId));
+    }
+
 }

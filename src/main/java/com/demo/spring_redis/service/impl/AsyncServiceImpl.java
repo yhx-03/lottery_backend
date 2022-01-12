@@ -1,7 +1,11 @@
 package com.demo.spring_redis.service.impl;
 
+import com.demo.spring_redis.entity.Lottery;
 import com.demo.spring_redis.entity.LotteryRecord;
+import com.demo.spring_redis.entity.LotteryUser;
+import com.demo.spring_redis.mapper.LotteryMapper;
 import com.demo.spring_redis.mapper.LotteryRecordMapper;
+import com.demo.spring_redis.mapper.LotteryUserMapper;
 import com.demo.spring_redis.service.AsyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,10 @@ public class AsyncServiceImpl implements AsyncService {
 
     @Autowired
     LotteryRecordMapper lotteryRecordMapper;
+    @Autowired
+    LotteryMapper lotteryMapper;
+    @Autowired
+    LotteryUserMapper lotteryUserMapper;
 
     /**
      * @Author yhx
@@ -30,7 +38,8 @@ public class AsyncServiceImpl implements AsyncService {
      * @param
      * @return void
      **/
-    @Async("LotteryRecordExecutor")
+    @Override
+    @Async("LotteryExecutor")
     public void insertLotteryRecord(Long userId, Long activityId) {
         LotteryRecord lotteryRecord = new LotteryRecord();
         lotteryRecord.setUserId(userId);
@@ -39,6 +48,28 @@ public class AsyncServiceImpl implements AsyncService {
         lotteryRecord.setCreateTime(now);
         lotteryRecord.setAlterTime(now);
         lotteryRecordMapper.insertOne(lotteryRecord);
+    }
+
+    /**
+     * @Author yhx
+     * @Description 插入中奖信息
+     * @Date 14:22 2022/1/12
+     * @param userId
+     * @param lottery
+     * @return void
+     **/
+    @Override
+    @Async("LotteryExecutor")
+    public void insertLotteryUser(Long userId, Lottery lottery) {
+        int now = Math.toIntExact(Calendar.getInstance().getTimeInMillis() / 1000);
+        String entireLotteryName = lotteryMapper.getEntireLotteryName(lottery.getId());
+        LotteryUser lotteryUser = new LotteryUser();
+        lotteryUser.setUserId(userId);
+        lotteryUser.setLotteryId(lottery.getId());
+        lotteryUser.setCreateTime(now);
+        lotteryUser.setAlterTime(now);
+        lotteryUser.setLotteryContent(entireLotteryName);
+        lotteryUserMapper.insertOne(lotteryUser);
     }
 
 }

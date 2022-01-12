@@ -10,7 +10,6 @@ import java.util.Objects;
  * @Description 抽奖奖项
  * @Date 16:10 2022/1/6
  **/
-@TableName("lottery")
 public class Lottery implements Serializable {
 
     private Long id;

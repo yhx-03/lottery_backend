@@ -5,4 +5,7 @@
 
 <mapper namespace="com.demo.spring_redis.mapper.LotteryUserMapper">
 
+    <insert id="insertOne">
+        insert into lottery_user(user_id, lottery_id, lottery_content, create_time, alter_time) values (#{userId}, #{lotteryId}, #{lotteryContent}, #{createTime}, #{alterTime})
+    </insert>
 </mapper>

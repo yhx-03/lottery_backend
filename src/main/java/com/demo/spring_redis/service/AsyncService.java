@@ -1,5 +1,7 @@
 package com.demo.spring_redis.service;
 
+import com.demo.spring_redis.entity.Lottery;
+
 /**
  * @program: spring_redis
  * @description:
@@ -10,4 +12,5 @@ public interface AsyncService {
 
     void insertLotteryRecord(Long userId, Long activityId);
 
+    void insertLotteryUser(Long userId, Lottery lottery);
 }

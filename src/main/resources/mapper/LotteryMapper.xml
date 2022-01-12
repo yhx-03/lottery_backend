@@ -5,23 +5,20 @@
 
 <mapper namespace="com.demo.spring_redis.mapper.LotteryMapper">
 
-    <resultMap type="com.demo.spring_redis.entity.Lottery" id="lottery_map">
-        <id column="id" property="id"/>
-        <result column="activity_id" property="activityId"/>
-        <result column="lottery_content" property="lotteryContent"/>
-        <result column="sum" property="sum"/>
-        <result column="inventory" property="inventory"/>
-        <result column="prob" property="prob"/>
-        <result column="create_time" property="createTime"/>
-        <result column="alter_time" property="alterTime"/>
-    </resultMap>
+    <update id="updateInventory">
+        update lottery set inventory = #{inventory} where id = #{lotteryId} and inventory > #{inventory}
+    </update>
 
     <select id="selectLotteries" resultType="com.demo.spring_redis.entity.Lottery">
         select * from lottery
     </select>
 
     <select id="selectByActivityIdLotteries" parameterType="long" resultType="com.demo.spring_redis.entity.Lottery">
-        select * from lottery where activity_id = #{activityId}
+        select * from lottery where activity_id = #{activityId} and inventory > 0
+    </select>
+
+    <select id="getEntireLotteryName" resultType="java.lang.String">
+        select concat(activity.activity_name, lottery.lottery_content) from activity, lottery where activity.id = lottery.activity_id and lottery.id = #{lotteryId}
     </select>
 
     <insert id="insertOne" parameterType="com.demo.spring_redis.entity.Lottery">

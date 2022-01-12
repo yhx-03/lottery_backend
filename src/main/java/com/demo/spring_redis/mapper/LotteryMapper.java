@@ -16,4 +16,8 @@ public interface LotteryMapper extends BaseMapper<Activity> {
 
     List<Lottery> selectByActivityIdLotteries(Long activityId);
 
+    String getEntireLotteryName(Long lotteryId);
+
+    void updateInventory(Integer inventory, Long lotteryId);
+
 }

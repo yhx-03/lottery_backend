@@ -9,7 +9,6 @@ import java.util.Objects;
  * @Description 总用户
  * @Date 16:09 2022/1/6
  **/
-@TableName("user")
 public class User {
 
     private Long id;

@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAsync
 public class AsyncConfiguration {
 
-    @Bean("LotteryRecordExecutor")
+    @Bean("LotteryExecutor")
     public Executor doSomethingExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // 核心线程数：线程池创建时候初始化的线程数
