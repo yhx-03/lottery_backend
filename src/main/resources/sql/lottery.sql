@@ -11,6 +11,7 @@ CREATE TABLE `user`  (
                          `status` tinyint DEFAULT 0 NOT NULL COMMENT '用户状态 -0 离线 -1 登录 -2 注销',
                          `create_time` int UNSIGNED NOT NULL COMMENT '创建时间',
                          `login_time` int UNSIGNED NOT NULL COMMENT '最近登录时间',
+                         UNIQUE INDEX (username),
                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 ROW_FORMAT = Dynamic;
 

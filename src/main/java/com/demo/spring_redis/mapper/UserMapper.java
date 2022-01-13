@@ -7,8 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    User login(String username, String password);
+    User login(String username, String password, Integer loginTime);
 
     Integer register(User user);
+
+    User selectLiveUser(String username);
 
 }

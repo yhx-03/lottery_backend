@@ -30,7 +30,8 @@ class UserMapperTest {
 
     @Test
     void login() {
-        User user = userMapper.login("yhx", "123456");
+        Integer loginTime = Math.toIntExact(Calendar.getInstance().getTimeInMillis() / 1000);
+        User user = userMapper.login("yhx", "123456", loginTime);
         log.info(String.valueOf(user));
     }
 

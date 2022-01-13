@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,7 @@ public class LotteryServiceImpl implements LotteryService {
         //生成存储后缀
         String suffix = Base64.getEncoder().encodeToString(activityId.toString().getBytes(StandardCharsets.UTF_8));
         // 生成redis中Lottery存储对应的key
-        String redisLotteryKey = "lotteryLock" + suffix;
+        String redisLotteryKey = "lottery_lock_" + suffix;
         String redisLotteriesKey = "lotteries_" + suffix;
 
         // 奖项

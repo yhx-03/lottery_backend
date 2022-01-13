@@ -8,6 +8,9 @@
     <select id="login" resultType="com.demo.spring_redis.entity.User">
         select * from user where username=#{username} and password = md5(#{password})
     </select>
+    <select id="selectLiveUser" resultType="com.demo.spring_redis.entity.User">
+        select * from user where username = #{username} and status != 2
+    </select>
 
     <insert id="register">
         insert into user(username, password, create_time, login_time) values (

@@ -13,6 +13,6 @@ public interface UserService {
 
     Boolean login(String username, String password);
 
-    Boolean register(User user);
+    Boolean register(String username, String password);
 
 }

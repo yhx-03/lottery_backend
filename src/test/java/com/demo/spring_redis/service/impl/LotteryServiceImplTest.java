@@ -2,21 +2,17 @@ package com.demo.spring_redis.service.impl;
 
 import com.demo.spring_redis.entity.Lottery;
 import com.demo.spring_redis.entity.LotteryRecord;
-import com.demo.spring_redis.entity.LotteryUser;
-import com.demo.spring_redis.service.LotteryService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Calendar;
 import java.util.List;
 
 @Slf4j
@@ -35,12 +31,6 @@ class LotteryServiceImplTest {
     @AfterEach
     void tearDown() {
     }
-
-//    @Test
-//    void select() {
-//        List<LotteryUser> lotteryUsers = lotteryService.selectAll(1L);
-//        log.info(lotteryUsers.toString());
-//    }
 
     @Test
     void selectAllLotteryUser() {
@@ -67,7 +57,6 @@ class LotteryServiceImplTest {
         redisTemplate.opsForValue().set("a", 1);
         Integer i = (Integer) redisTemplate.opsForValue().get("a");
         try {
-//          ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(System.out);
             objectOutputStream.write(i);
             objectOutputStream.flush();
@@ -75,7 +64,6 @@ class LotteryServiceImplTest {
         catch (Exception e) {
             e.printStackTrace();
         }
-//        redisTemplate.opsForValue().increment("a", -1);
     }
 
     @Test
