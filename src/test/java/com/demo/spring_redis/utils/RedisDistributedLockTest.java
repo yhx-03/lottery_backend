@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -30,7 +32,7 @@ class RedisDistributedLockTest {
 
     @Test
     void tryGetDistributedLock() {
-        boolean result = redisDistributedLock.tryGetDistributedLock(lockKey, requestId, expireTime);
+        boolean result = redisDistributedLock.tryGetDistributedLock(lockKey, requestId, expireTime, TimeUnit.SECONDS);
         log.info(String.valueOf(result));
     }
 

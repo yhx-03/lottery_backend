@@ -30,16 +30,14 @@ public class RedisDistributedLock {
      * @param expireTime 超期时间
      * @return boolean 是否获取成功
      **/
-    public boolean tryGetDistributedLock(String lockKey, String requestId, int expireTime) {
+    public <T, V> boolean tryGetDistributedLock(T lockKey, V requestId, int expireTime, TimeUnit timeUnit) {
 
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        if (valueOperations.get(lockKey) == null) {
-            valueOperations.set(lockKey, requestId, expireTime, TimeUnit.SECONDS);
-            return true;
-        }
-        else {
+        // 判断lockkey, requestId非空
+        if(lockKey == null || requestId == null){
             return false;
         }
+        // 采用setifAbsent(即setnx方法)
+        return redisTemplate.opsForValue().setIfAbsent(String.valueOf(lockKey), String.valueOf(requestId), expireTime, timeUnit);
 
     }
 
@@ -51,15 +49,33 @@ public class RedisDistributedLock {
      * @param requestId 请求标识
      * @return boolean 是否释放成功
      **/
-    public boolean releaseDistributedLock(String lockKey, String requestId) {
+    public <T, V> boolean releaseDistributedLock(T lockKey, V requestId) {
+
+        // 判断lockkey, requestId非空
+        if(lockKey == null || requestId == null){
+            return false;
+        }
+
         // lua脚本内容，依赖redis执行lua脚本的原子性·
-        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("if redis.call('get', KEYS[1]) == ARGV[1]");
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("then");
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("  return redis.call('del', KEYS[1])");
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("else");
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("  return 0");
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("end");
+        String script = stringBuilder.toString();
         DefaultRedisScript<Boolean> defaultRedisScript = new DefaultRedisScript<Boolean>();
         defaultRedisScript.setResultType(Boolean.class);
         defaultRedisScript.setScriptText(script);
-        Boolean result = redisTemplate.execute(defaultRedisScript, Collections.singletonList(lockKey), requestId);
 
-        return result;
+        // redis执行lua脚本
+        return redisTemplate.execute(defaultRedisScript, Collections.singletonList(String.valueOf(lockKey)), String.valueOf(requestId));
 
     }
 

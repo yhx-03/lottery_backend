@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Calendar;
@@ -55,13 +56,33 @@ class LotteryServiceImplTest {
         //生成存储后缀
         String suffix = Base64.getEncoder().encodeToString(String.valueOf(activityId).getBytes(StandardCharsets.UTF_8));
         // 生成redis中Lottery存储对应的key
-        String redisLotteryInventoryKey = "lotteries_inventory" + suffix;
-        String redisLotteryPercentageKey = "lotteries_percentage" + suffix;
+        String redisLotteriesKey = "lotteries_" + suffix;
 
-        HashOperations hashOperations = redisTemplate.opsForHash();
-
-        Lottery lottery = lotteryService.LotteryOnePrize(activityId, hashOperations, redisLotteryInventoryKey, redisLotteryPercentageKey);
+        Lottery lottery = lotteryService.LotteryOnePrize(activityId, redisLotteriesKey);
         log.info(String.valueOf(lottery));
     }
 
+    @Test
+    void aaa() {
+        redisTemplate.opsForValue().set("a", 1);
+        Integer i = (Integer) redisTemplate.opsForValue().get("a");
+        try {
+//          ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(System.out);
+            objectOutputStream.write(i);
+            objectOutputStream.flush();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+//        redisTemplate.opsForValue().increment("a", -1);
+    }
+
+    @Test
+    void userLottery() {
+        Long userId = 1L;
+        Long activityId = 1L;
+        Lottery lottery = lotteryService.userLottery(userId, activityId);
+        log.info(String.valueOf(lottery));
+    }
 }

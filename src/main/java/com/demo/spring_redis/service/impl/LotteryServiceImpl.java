@@ -51,24 +51,24 @@ public class LotteryServiceImpl implements LotteryService {
         //生成存储后缀
         String suffix = Base64.getEncoder().encodeToString(activityId.toString().getBytes(StandardCharsets.UTF_8));
         // 生成redis中Lottery存储对应的key
-        String redisLotteryKey = "lotteries" + suffix;
-        String redisLotteryInventoryKey = "lotteries_inventory" + suffix;
-        String redisLotteryPercentageKey = "lotteries_percentage" + suffix;
+        String redisLotteryKey = "lotteryLock" + suffix;
+        String redisLotteriesKey = "lotteries_" + suffix;
+
+        // 奖项
+        Lottery lottery;
 
         // 用户可以多次参与轮盘抽奖
-        // 抽奖逻辑: 使用redis的setnx实现数据一致性
-        while (redisTemplate.opsForValue().get(redisLotteryKey) != null) {
-
+        // 通过redis实现抽奖，redis实现分布式锁，保证数据一致性
+        // 加锁
+        while (true) {
+            if (redisDistributedLock.tryGetDistributedLock(redisLotteryKey, userId, 2, TimeUnit.SECONDS)) {
+                // 抽奖
+                lottery = LotteryOnePrize(activityId, redisLotteriesKey);
+                break;
+            }
         }
-
-        redisTemplate.opsForValue().set(redisLotteryKey, 1, 3, TimeUnit.SECONDS);
-
-        HashOperations hashOperations = redisTemplate.opsForHash();
-        // 抽奖数据
-        Lottery lottery = LotteryOnePrize(activityId, hashOperations, redisLotteryInventoryKey, redisLotteryPercentageKey);
-        hashOperations.increment(redisLotteryInventoryKey, activityId, -1);
-
-        redisTemplate.opsForValue().getAndDelete(redisLotteryKey);
+        // 解锁
+        redisDistributedLock.releaseDistributedLock(redisLotteryKey, userId);
 
         // 依赖redis保障并发, 之后再插入数据库
         // 插入中奖用户数据
@@ -86,46 +86,38 @@ public class LotteryServiceImpl implements LotteryService {
      * @Description 抽取奖项
      * @Date 14:42 2022/1/12
      * @param activityId
-     * @param hashOperations
-     * @param redisLotteryInventoryKey
-     * @param redisLotteryPercentageKey
+     * @param redisLotteriesKey
      * @return com.demo.spring_redis.entity.Lottery
      **/
-    public Lottery LotteryOnePrize(Long activityId, HashOperations hashOperations, String redisLotteryInventoryKey, String redisLotteryPercentageKey){
+    public Lottery LotteryOnePrize(Long activityId, String redisLotteriesKey){
 
+        HashOperations hashOperations = redisTemplate.opsForHash();
         // 待读取的数据
         Lottery lotteryItem = null;
         // 从redis中读取数据, 如无则为null
-        Map<Long, Integer> lotteryItemsInventory = hashOperations.entries(redisLotteryInventoryKey);
-        Map<Long, Integer> lotteryItemsPercentage = hashOperations.entries(redisLotteryPercentageKey);
+        Map<Long, Lottery> lotteryItemsMap = hashOperations.entries(redisLotteriesKey);
         List<Lottery> lotteryItems;
 
         // 说明还未加载到缓存中，从数据库加载，并且将数据缓存
-        if (lotteryItemsInventory.size() == 0 || lotteryItemsPercentage.size() == 0 ) {
+        if (lotteryItemsMap.size() == 0 ) {
             // 读取该活动所有库存大于0的奖项
             lotteryItems = lotteryMapper.selectByActivityIdLotteries(activityId);
             // 向redis中写入奖项的概率，库存
             lotteryItems.stream().forEach(li -> {
-                hashOperations.put(redisLotteryInventoryKey, li.getId(), li.getInventory());
-                hashOperations.put(redisLotteryPercentageKey, li.getId(), li.getProb());
+                hashOperations.put(redisLotteriesKey, li.getId(), li);
             });
         }
         else {
             lotteryItems = new LinkedList<Lottery>();
             // 传入奖项列表
-            lotteryItemsInventory.forEach((k, v) -> {
-                Lottery lottery = new Lottery();
+            lotteryItemsMap.forEach((k, v) -> {
                 // 判断库存是否为空
-                if (v > 0L) {
-                    lottery.setId(k);
-                    lottery.setInventory(v);
-                    lottery.setProb(lotteryItemsPercentage.get(k));
-                    lotteryItems.add(lottery);
+                if (v.getInventory() > 0L) {
+                    lotteryItems.add(v);
                 }
                 else {
                     // 删除库存为0的数据
-                    hashOperations.delete(redisLotteryInventoryKey, k);
-                    hashOperations.delete(redisLotteryPercentageKey, k);
+                    hashOperations.delete(redisLotteriesKey, k);
                 }
             });
         }
@@ -164,6 +156,11 @@ public class LotteryServiceImpl implements LotteryService {
                 break;
             }
         }
+
+        lotteryItem.decrInventory(1);
+
+        hashOperations.delete(redisLotteriesKey, lotteryItem.getId());
+        hashOperations.put(redisLotteriesKey, lotteryItem.getId(), lotteryItem);
 
         return lotteryItem;
     }

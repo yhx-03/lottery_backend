@@ -100,6 +100,10 @@ public class Lottery implements Serializable {
         this.alterTime = alterTime;
     }
 
+    public void decrInventory(Integer i) {
+        inventory = inventory - i;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
