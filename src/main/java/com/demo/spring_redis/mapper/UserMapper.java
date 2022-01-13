@@ -9,6 +9,6 @@ public interface UserMapper extends BaseMapper<User> {
 
     User login(String username, String password);
 
-    void register(User user);
+    Integer register(User user);
 
 }

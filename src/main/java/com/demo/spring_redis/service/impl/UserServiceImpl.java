@@ -1,13 +1,10 @@
 package com.demo.spring_redis.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.demo.spring_redis.entity.User;
 import com.demo.spring_redis.mapper.UserMapper;
 import com.demo.spring_redis.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -17,26 +14,30 @@ public class UserServiceImpl implements UserService {
 
     /**
      * @Author yhx
-     * @Description 查找所用用户
-     * @Date 17:11 2022/1/6
-     * @param
-     * @return java.util.List<com.demo.spring_redis.entity.User>
+     * @Description 用户
+     * @Date 14:47 2022/1/13
+     * @param username
+     * @param password
+     * @return com.demo.spring_redis.entity.User
      **/
     @Override
-    public List<User> selectAll() {
-        return userMapper.selectList(new QueryWrapper<User>());
+    public Boolean login(String username, String password) {
+        return userMapper.login(username, password) != null;
     }
 
     /**
      * @Author yhx
-     * @Description 根据id查找用户
-     * @Date 17:11 2022/1/6
-     * @param id
-     * @return com.demo.spring_redis.entity.User
+     * @Description 用户注册
+     * @Date 14:47 2022/1/13
+     * @param user
+     * @return void
      **/
     @Override
-    public User selectById(Long id) {
-        return userMapper.selectById(id);
+    public Boolean register(User user) {
+        return userMapper.register(user) == 1;
     }
+
+
+
 
 }

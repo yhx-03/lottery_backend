@@ -31,7 +31,7 @@ class UserMapperTest {
     @Test
     void login() {
         User user = userMapper.login("yhx", "123456");
-        log.info(user.toString());
+        log.info(String.valueOf(user));
     }
 
     @Test
@@ -43,6 +43,7 @@ class UserMapperTest {
         user.setStatus(0);
         user.setCreateTime(now);
         user.setLoginTime(now);
-        userMapper.register(user);
+        Integer i = userMapper.register(user);
+        log.info(String.valueOf(i));
     }
 }

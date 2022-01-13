@@ -11,8 +11,8 @@ import java.util.List;
  **/
 public interface UserService {
 
-    List<User> selectAll();
+    Boolean login(String username, String password);
 
-    User selectById(Long id);
+    Boolean register(User user);
 
 }

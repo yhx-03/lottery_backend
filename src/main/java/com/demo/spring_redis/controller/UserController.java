@@ -6,16 +6,15 @@ import org.springframework.stereotype.Controller;
 
 /**
  * @program: spring_redis
- * @description: 登录controller
+ * @description: 用户controller
  * @author: yhx
  * @create: 2022-01-10 13:28
  **/
 @Controller
-public class RegisterController {
+public class UserController {
 
     @Autowired
     UserMapper userMapper;
-
 
 
 }
