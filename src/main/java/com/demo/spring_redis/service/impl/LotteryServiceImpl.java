@@ -259,53 +259,6 @@ public class LotteryServiceImpl implements LotteryService {
         return lotteryItem;
     }
 
-//    /**
-//     * @Author yhx
-//     * @Description 随机抽取用户
-//     * @Date 17:10 2022/1/6
-//     * @param activityId
-//     * @return java.util.List<com.demo.spring_redis.entity.LotteryUser>
-//     **/
-//    @Override
-//    public List<LotteryUser> selectAll(Long activityId) {
-//        // 获得具体抽奖的各个奖项
-//        List<Lottery> lotteries = lotteryMapper.selectByActivityIdLotteries(activityId);
-//
-//        // 获得参与抽奖人, 将抽奖用户写入redis, 设置5分钟时限
-//        val setOperations = redisTemplate.opsForSet();
-//        selectAllLotteryUser(activityId)
-//                .stream()
-//                .forEach(u -> {
-//                    setOperations.add(activityId, u.getUserId());
-//                });
-//        redisTemplate.expire(activityId,5, TimeUnit.MINUTES);
-//
-//        // 中奖用户list
-//        List<LotteryUser> lotteryUsers = new LinkedList<LotteryUser>();
-//        // 随机抽取用户
-//        for(Lottery l: lotteries) {
-//            // 抽取用户
-//            List<Long> list = new LinkedList<>();
-//            for(int i = 0; i < l.getSum();i ++){
-//                list.add((Long)setOperations.pop(activityId));
-//            }
-//            lotteryUsers.addAll(
-//                    list.stream()
-//                            .map(id -> {
-//                                LotteryUser lotteryUser = new LotteryUser();
-//                                lotteryUser.setUserId(id);
-//                                lotteryUser.setLotteryId(l.getId());
-//                                return lotteryUser;
-//                            })
-//                            .collect(Collectors.toSet())
-//            );
-//        }
-//        // 清除redis
-//        redisTemplate.delete(activityId);
-//
-//        return lotteryUsers;
-//    }
-
     /**
      * @Author yhx
      * @Description 插入抽奖记录
