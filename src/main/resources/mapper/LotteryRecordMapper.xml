@@ -12,12 +12,12 @@
     </insert>
 
     <select id="selectByActivityIdLotteryRecord" resultType="com.demo.spring_redis.entity.LotteryRecord">
-        select (id, user_id, activity_id, create_time, alter_time) from lottery_record where activity_id = #{activityId}
+        select id, user_id, activity_id, create_time, alter_time from lottery_record where activity_id = #{activityId}
     </select>
 
     <select id="selectByActivityIdAndUserIdLotteryRecord"
             resultType="com.demo.spring_redis.entity.LotteryRecord">
-        select (id, user_id, activity_id, create_time, alter_time) from lottery_record where activity_id = #{activityId} and user_id = #{userId}
+        select id, user_id, activity_id, create_time, alter_time from lottery_record where activity_id = #{activityId} and user_id = #{userId}
     </select>
 
 </mapper>
