@@ -14,10 +14,12 @@ public interface LotteryMapper extends BaseMapper<Activity> {
 
     void insertOne(Lottery lottery);
 
-    List<Lottery> selectByActivityIdLotteries(Long activityId);
+    List<Lottery> selectByActivityIdLotteriesWithoutDefault(Long activityId);
 
     String getEntireLotteryName(Long lotteryId);
 
     void updateInventory(Integer inventory, Long lotteryId);
+
+    Lottery selectByActivityIdDefaultLotteries(Long activityId);
 
 }

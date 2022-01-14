@@ -13,6 +13,7 @@ public class LotteryUser {
     private Long id;
     private Long userId;
     private Long lotteryId;
+    private Long lotteryRecordId;
     private String lotteryContent;
     private Integer createTime;
     private Integer alterTime;
@@ -20,10 +21,11 @@ public class LotteryUser {
     public LotteryUser() {
     }
 
-    public LotteryUser(Long id, Long userId, Long lotteryId, String lotteryContent, Integer createTime, Integer alterTime) {
+    public LotteryUser(Long id, Long userId, Long lotteryId, Long lotteryRecordId, String lotteryContent, Integer createTime, Integer alterTime) {
         this.id = id;
         this.userId = userId;
         this.lotteryId = lotteryId;
+        this.lotteryRecordId = lotteryRecordId;
         this.lotteryContent = lotteryContent;
         this.createTime = createTime;
         this.alterTime = alterTime;
@@ -77,17 +79,25 @@ public class LotteryUser {
         this.alterTime = alterTime;
     }
 
+    public Long getLotteryRecordId() {
+        return lotteryRecordId;
+    }
+
+    public void setLotteryRecordId(Long lotteryRecordId) {
+        this.lotteryRecordId = lotteryRecordId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LotteryUser that = (LotteryUser) o;
-        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(lotteryId, that.lotteryId) && Objects.equals(lotteryContent, that.lotteryContent) && Objects.equals(createTime, that.createTime) && Objects.equals(alterTime, that.alterTime);
+        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(lotteryId, that.lotteryId) && Objects.equals(lotteryRecordId, that.lotteryRecordId) && Objects.equals(lotteryContent, that.lotteryContent) && Objects.equals(createTime, that.createTime) && Objects.equals(alterTime, that.alterTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, lotteryId, lotteryContent, createTime, alterTime);
+        return Objects.hash(id, userId, lotteryId, lotteryRecordId, lotteryContent, createTime, alterTime);
     }
 
     @Override
@@ -96,6 +106,7 @@ public class LotteryUser {
                 "id:" + id +
                 ", userId:" + userId +
                 ", lotteryId:" + lotteryId +
+                ", lotteryRecordId:" + lotteryRecordId +
                 ", lotteryContent:'" + lotteryContent + '\'' +
                 ", createTime:" + createTime +
                 ", alterTime:" + alterTime +

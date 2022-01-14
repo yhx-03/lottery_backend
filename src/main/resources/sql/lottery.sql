@@ -41,18 +41,19 @@ CREATE TABLE `lottery`  (
                          `id` bigint(20) UNSIGNED ZEROFILL NOT NULL AUTO_INCREMENT COMMENT '奖项id',
                          `activity_id` bigint(20) UNSIGNED NOT NULL COMMENT '活动id',
                          `lottery_content` varchar(255) NOT NULL COMMENT '奖项内容',
+                         `category` tinyint(1) DEFAULT 1 NOT NULL COMMENT '奖项类型 -0 谢谢参与 -1 获奖奖项',
                          `sum` int NOT NULL COMMENT '总数',
                          `inventory` int NOT NULL COMMENT '库存数量',
-                         `prob` int NOT NULL COMMENT '概率',
+                         `prob` int NOT NULL COMMENT '概率(实际概率 * 10000)',
                          `create_time` int UNSIGNED NOT NULL COMMENT '创建时间',
                          `alter_time` int UNSIGNED NOT NULL COMMENT '最近修改时间',
                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 ROW_FORMAT = Dynamic;
 
-INSERT INTO `lottery` VALUES (00000000000000000001, 1, '一等奖', 1, 1, 1, 1641889758, 1641889758);
-INSERT INTO `lottery` VALUES (00000000000000000002, 1, '二等奖', 3, 3, 3, 1641889758, 1641889758);
-INSERT INTO `lottery` VALUES (00000000000000000003, 1, '三等奖', 10, 10, 10, 1641889758, 1641889758);
-INSERT INTO `lottery` VALUES (00000000000000000004, 1, '参与奖', 100, 100, 100, 1641892130, 1641892130);
+INSERT INTO `lottery` VALUES (00000000000000000001, 1, '一等奖', 1, 10, 10, 10, 1641889758, 1641889758);
+INSERT INTO `lottery` VALUES (00000000000000000002, 1, '二等奖', 1, 100, 100, 100, 1641889758, 1641889758);
+INSERT INTO `lottery` VALUES (00000000000000000003, 1, '三等奖', 1, 500, 500, 500, 1641889758, 1641889758);
+INSERT INTO `lottery` VALUES (00000000000000000004, 1, '谢谢参与', 0, 0, 0, 0, 1641892130, 1641892130);
 
 -- ----------------------------
 -- 抽奖记录表

@@ -47,18 +47,6 @@ class LotteryMapperTest {
     }
 
     @Test
-    void selectByActivityIdLotteries() {
-        List<Lottery> lotteries = lotteryMapper.selectByActivityIdLotteries(1L);
-        log.info(lotteries.toString());
-    }
-
-    @Test
-    void testSelectByActivityIdLotteries() {
-        List<Lottery> lottery = lotteryMapper.selectByActivityIdLotteries(1L);
-        log.info(String.valueOf(lottery));
-    }
-
-    @Test
     void getEntireLotteryName() {
         Long activityId = 2L;
 

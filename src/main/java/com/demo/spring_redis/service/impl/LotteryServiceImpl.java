@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,6 +34,8 @@ public class LotteryServiceImpl implements LotteryService {
     LotteryMapper lotteryMapper;
     @Autowired
     RedisDistributedLock redisDistributedLock;
+
+    public static final int ALLPROB = 10000;
 
     /**
      * @Author yhx
@@ -78,30 +81,65 @@ public class LotteryServiceImpl implements LotteryService {
      **/
     public Lottery LotteryOnePrizeDirect(Long userId, Long activityId) {
 
+        // 1.判断是否有谢谢参与商品
+        // 2.筛选出所有有库存的商品
+        // 3.通过概率实现随机抽奖
+        // 4.减库存,插记录
+        Lottery defaultLottery = lotteryMapper.selectByActivityIdDefaultLotteries(activityId);
+        if  (defaultLottery != null) {
+            return LotteryOnePrizeDirectWithDefault(defaultLottery, userId, activityId);
+        }
+        else {
+            Lottery lottery = new Lottery();
+            lottery.setId(0L);
+            lottery.setCategory(0);
+            lottery.setLotteryContent("谢谢参与");
+            return LotteryOnePrizeDirectWithDefault(lottery, userId, activityId);
+        }
+    }
+
+    /**
+     * @Author yhx
+     * @Description
+     * @Date 14:59 2022/1/14
+     * @param defaultLottery
+     * @param userId
+     * @param activityId
+     * @return com.demo.spring_redis.entity.Lottery
+     **/
+    public Lottery LotteryOnePrizeDirectWithDefault(Lottery defaultLottery, Long userId, Long activityId){
+
         // 待读取的数据
         Lottery lotteryItem = null;
-        // 读取该活动所有库存大于0的奖项
-        List<Lottery> lotteryItems = lotteryMapper.selectByActivityIdLotteries(activityId);
+
+        // 读取该活动的奖项
+        List<Lottery> lotteryItems = lotteryMapper.selectByActivityIdLotteriesWithoutDefault(activityId);
 
         int lastScope = 0;
         // 将数组随机打乱
         Collections.shuffle(lotteryItems);
         // 构造抽奖区间
         Map<Long, Integer[]> awardItemScope = new HashMap<Long, Integer[]>();
+
         // item.getProb()=50 (50 / 10000 = 0.005)
-        // sum_inventory: 各个奖项总库存
-        int sum_inventory = 0;
+        // sum_inventory: 总概率
+        int sum_prob = 0;
         for (Lottery item : lotteryItems) {
-            // width为概率区间宽度(概率 * 库存)
-            int width = item.getProb() * item.getInventory();
-            sum_inventory += width;
+            // width为概率区间宽度（概率 = 真实概率 * 10000)
+            int width = item.getProb();
+            sum_prob += width;
             int currentScope = lastScope + new BigDecimal(width).intValue();
             awardItemScope.put(item.getId(), new Integer[]{lastScope + 1, currentScope});
             lastScope = currentScope;
         }
 
+        defaultLottery.setProb(ALLPROB - sum_prob);
+        int currentScope = lastScope + new BigDecimal(defaultLottery.getProb()).intValue();
+        awardItemScope.put(defaultLottery.getId(), new Integer[]{lastScope + 1, currentScope});
+        lotteryItems.add(defaultLottery);
+
         // 产生中奖随机数并抽奖
-        int luckyNumber = new Random().nextInt(sum_inventory);
+        int luckyNumber = new Random().nextInt(ALLPROB) + 1;
         Long luckyPrizeId = 0L;
         Set<Map.Entry<Long, Integer[]>> set = awardItemScope.entrySet();
         for (Map.Entry<Long, Integer[]> entry : set) {
@@ -119,16 +157,21 @@ public class LotteryServiceImpl implements LotteryService {
             }
         }
 
-        // 库存减少1
-        lotteryItem.decrInventory(1);
-        // 插入中奖用户数据
-        insertLotteryUser(userId, lotteryItem);
-        // 更改奖项库存数据
-        updateLotteryInventory(lotteryItem.getInventory(), lotteryItem.getId());
-        // 插入抽奖记录数据
-        insertLotteryRecord(userId, activityId);
+        if (lotteryItem.getCategory() == 1) {
+            // 库存减少1
+            lotteryItem.decrInventory(1);
+            // 更改奖项库存数据
+            updateLotteryInventory(lotteryItem.getInventory(), lotteryItem.getId());
+            // 插入抽奖记录数据
+            insertLotteryRecord(userId, activityId);
+            // 插入中奖用户数据
+            insertLotteryUser(userId, lotteryItem);
+            return lotteryItem;
+        }
+        else {
+            return defaultLottery;
+        }
 
-        return lotteryItem;
     }
 
     /**
@@ -140,6 +183,7 @@ public class LotteryServiceImpl implements LotteryService {
      * @return com.demo.spring_redis.entity.Lottery
      **/
     @Override
+    @Deprecated
     public Lottery userLottery(Long userId, Long activityId) {
 
         //生成存储后缀
@@ -183,6 +227,7 @@ public class LotteryServiceImpl implements LotteryService {
      * @param redisLotteriesKey
      * @return com.demo.spring_redis.entity.Lottery
      **/
+    @Deprecated
     public Lottery LotteryOnePrize(Long activityId, String redisLotteriesKey) {
 
         HashOperations hashOperations = redisTemplate.opsForHash();
@@ -195,7 +240,7 @@ public class LotteryServiceImpl implements LotteryService {
         // 说明还未加载到缓存中，从数据库加载，并且将数据缓存
         if (lotteryItemsMap.size() == 0 ) {
             // 读取该活动所有库存大于0的奖项
-            lotteryItems = lotteryMapper.selectByActivityIdLotteries(activityId);
+            lotteryItems = lotteryMapper.selectByActivityIdLotteriesWithoutDefault(activityId);
             // 向redis中写入奖项的概率，库存
             lotteryItems.stream().forEach(li -> {
                 hashOperations.put(redisLotteriesKey, li.getId(), li);
@@ -322,7 +367,7 @@ public class LotteryServiceImpl implements LotteryService {
      **/
     @Override
     public List<Lottery> selectByActivityIdLotteries(Long activityId) {
-        return lotteryMapper.selectByActivityIdLotteries(activityId);
+        return lotteryMapper.selectByActivityIdLotteriesWithoutDefault(activityId);
     }
 
 }

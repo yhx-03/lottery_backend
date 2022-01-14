@@ -13,12 +13,15 @@
         select * from lottery
     </select>
 
-    <select id="selectByActivityIdLotteries" parameterType="long" resultType="com.demo.spring_redis.entity.Lottery">
-        select * from lottery where activity_id = #{activityId} and inventory > 0
+    <select id="selectByActivityIdLotteriesWithoutDefault" parameterType="long" resultType="com.demo.spring_redis.entity.Lottery">
+        select * from lottery where activity_id = #{activityId} and category = 1 and inventory > 0
     </select>
 
     <select id="getEntireLotteryName" resultType="java.lang.String">
         select concat(activity.activity_name, lottery.lottery_content) from activity, lottery where activity.id = lottery.activity_id and lottery.id = #{lotteryId}
+    </select>
+    <select id="selectByActivityIdDefaultLotteries" resultType="com.demo.spring_redis.entity.Lottery">
+        select * from lottery where activity_id = #{activityId} and category = 0
     </select>
 
     <insert id="insertOne" parameterType="com.demo.spring_redis.entity.Lottery">

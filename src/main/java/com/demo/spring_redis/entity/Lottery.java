@@ -15,6 +15,7 @@ public class Lottery implements Serializable {
     private Long id;
     private Long activityId;
     private String lotteryContent;
+    private Integer category;
     private Integer sum;
     private Integer inventory;
     // prob = 0.05 * 10000 = 50
@@ -25,10 +26,11 @@ public class Lottery implements Serializable {
     public Lottery() {
     }
 
-    public Lottery(Long id, Long activityId, String lotteryContent, Integer sum, Integer inventory, Integer prob, Integer createTime, Integer alterTime) {
+    public Lottery(Long id, Long activityId, String lotteryContent, Integer category, Integer sum, Integer inventory, Integer prob, Integer createTime, Integer alterTime) {
         this.id = id;
         this.activityId = activityId;
         this.lotteryContent = lotteryContent;
+        this.category = category;
         this.sum = sum;
         this.inventory = inventory;
         this.prob = prob;
@@ -104,17 +106,25 @@ public class Lottery implements Serializable {
         inventory = inventory - i;
     }
 
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Lottery lottery = (Lottery) o;
-        return Objects.equals(id, lottery.id) && Objects.equals(activityId, lottery.activityId) && Objects.equals(lotteryContent, lottery.lotteryContent) && Objects.equals(sum, lottery.sum) && Objects.equals(inventory, lottery.inventory) && Objects.equals(prob, lottery.prob) && Objects.equals(createTime, lottery.createTime) && Objects.equals(alterTime, lottery.alterTime);
+        return Objects.equals(id, lottery.id) && Objects.equals(activityId, lottery.activityId) && Objects.equals(lotteryContent, lottery.lotteryContent) && Objects.equals(category, lottery.category) && Objects.equals(sum, lottery.sum) && Objects.equals(inventory, lottery.inventory) && Objects.equals(prob, lottery.prob) && Objects.equals(createTime, lottery.createTime) && Objects.equals(alterTime, lottery.alterTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, activityId, lotteryContent, sum, inventory, prob, createTime, alterTime);
+        return Objects.hash(id, activityId, lotteryContent, category, sum, inventory, prob, createTime, alterTime);
     }
 
     @Override
@@ -123,6 +133,7 @@ public class Lottery implements Serializable {
                 "id:" + id +
                 ", activityId:" + activityId +
                 ", lotteryContent:'" + lotteryContent + '\'' +
+                ", category:" + category +
                 ", sum:" + sum +
                 ", inventory:" + inventory +
                 ", prob:" + prob +
@@ -130,5 +141,4 @@ public class Lottery implements Serializable {
                 ", alterTime:" + alterTime +
                 '}';
     }
-
 }

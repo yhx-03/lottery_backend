@@ -1,7 +1,6 @@
 package com.demo.spring_redis.controller;
 
 import com.demo.spring_redis.entity.Lottery;
-import com.demo.spring_redis.mapper.LotteryMapper;
 import com.demo.spring_redis.service.LotteryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
