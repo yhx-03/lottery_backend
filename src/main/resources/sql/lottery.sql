@@ -15,6 +15,8 @@ CREATE TABLE `user`  (
                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 ROW_FORMAT = Dynamic;
 
+INSERT INTO `user` VALUES (00000000000000000001, 'yhx', 'e10adc3949ba59abbe56e057f20f883e', 0, 1641866871, 1641866871);
+
 -- ----------------------------
 -- 活动表
 -- ----------------------------
@@ -28,6 +30,8 @@ CREATE TABLE `activity`  (
                          `alter_time` int UNSIGNED NOT NULL COMMENT '最近修改时间',
                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 ROW_FORMAT = Dynamic;
+
+INSERT INTO `activity` VALUES (00000000000000000001, '周年', 1644897650, 1646280021, 1641889758, 1641889758);
 
 -- ----------------------------
 -- 奖项表
@@ -44,6 +48,11 @@ CREATE TABLE `lottery`  (
                          `alter_time` int UNSIGNED NOT NULL COMMENT '最近修改时间',
                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 ROW_FORMAT = Dynamic;
+
+INSERT INTO `lottery` VALUES (00000000000000000001, 1, '一等奖', 1, 1, 1, 1641889758, 1641889758);
+INSERT INTO `lottery` VALUES (00000000000000000002, 1, '二等奖', 3, 3, 3, 1641889758, 1641889758);
+INSERT INTO `lottery` VALUES (00000000000000000003, 1, '三等奖', 10, 10, 10, 1641889758, 1641889758);
+INSERT INTO `lottery` VALUES (00000000000000000004, 1, '参与奖', 100, 100, 100, 1641892130, 1641892130);
 
 -- ----------------------------
 -- 抽奖记录表

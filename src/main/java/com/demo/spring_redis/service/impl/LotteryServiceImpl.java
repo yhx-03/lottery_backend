@@ -10,13 +10,9 @@ import com.demo.spring_redis.service.LotteryService;
 import com.demo.spring_redis.utils.RedisDistributedLock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +36,104 @@ public class LotteryServiceImpl implements LotteryService {
 
     /**
      * @Author yhx
-     * @Description 用户抽奖,采用redis存储单线程性质实现库存不超量
+     * @Description
+     * @Date 9:30 2022/1/14
+     * @param userId
+     * @param activityId
+     * @return com.demo.spring_redis.entity.Lottery
+     **/
+    @Override
+    public Lottery userLotteryDirect(Long userId, Long activityId) {
+        //生成存储后缀
+        String suffix = Base64.getEncoder().encodeToString(activityId.toString().getBytes(StandardCharsets.UTF_8));
+        // 生成redis中Lottery存储对应的key
+        String redisLotteryKey = "lottery_lock_" + suffix;
+
+        // 奖项
+        Lottery lottery;
+
+        // 用户可以多次参与轮盘抽奖
+        // 通过redis实现抽奖，redis实现分布式锁
+        // 加锁
+        while (true) {
+            if (redisDistributedLock.tryGetDistributedLock(redisLotteryKey, userId, 2, TimeUnit.SECONDS)) {
+                // 抽奖
+                lottery = LotteryOnePrizeDirect(userId, activityId);
+                break;
+            }
+        }
+        // 解锁
+        redisDistributedLock.releaseDistributedLock(redisLotteryKey, userId);
+
+        return lottery;
+    }
+
+    /**
+     * @Author yhx
+     * @Description (直接使用mysql, 用redis分布式锁保障不超卖)抽取奖项
+     * @Date 9:09 2022/1/14
+     * @param userId
+     * @param activityId
+     * @return com.demo.spring_redis.entity.Lottery
+     **/
+    public Lottery LotteryOnePrizeDirect(Long userId, Long activityId) {
+
+        // 待读取的数据
+        Lottery lotteryItem = null;
+        // 读取该活动所有库存大于0的奖项
+        List<Lottery> lotteryItems = lotteryMapper.selectByActivityIdLotteries(activityId);
+
+        int lastScope = 0;
+        // 将数组随机打乱
+        Collections.shuffle(lotteryItems);
+        // 构造抽奖区间
+        Map<Long, Integer[]> awardItemScope = new HashMap<Long, Integer[]>();
+        // item.getProb()=50 (50 / 10000 = 0.005)
+        // sum_inventory: 各个奖项总库存
+        int sum_inventory = 0;
+        for (Lottery item : lotteryItems) {
+            // width为概率区间宽度(概率 * 库存)
+            int width = item.getProb() * item.getInventory();
+            sum_inventory += width;
+            int currentScope = lastScope + new BigDecimal(width).intValue();
+            awardItemScope.put(item.getId(), new Integer[]{lastScope + 1, currentScope});
+            lastScope = currentScope;
+        }
+
+        // 产生中奖随机数并抽奖
+        int luckyNumber = new Random().nextInt(sum_inventory);
+        Long luckyPrizeId = 0L;
+        Set<Map.Entry<Long, Integer[]>> set = awardItemScope.entrySet();
+        for (Map.Entry<Long, Integer[]> entry : set) {
+            if (luckyNumber >= entry.getValue()[0] && luckyNumber <= entry.getValue()[1]) {
+                luckyPrizeId = entry.getKey();
+                break;
+            }
+        }
+
+        //获得抽奖奖项
+        for (Lottery item : lotteryItems) {
+            if (item.getId().intValue() == luckyPrizeId) {
+                lotteryItem = item;
+                break;
+            }
+        }
+
+        // 库存减少1
+        lotteryItem.decrInventory(1);
+        // 插入中奖用户数据
+        insertLotteryUser(userId, lotteryItem);
+        // 更改奖项库存数据
+        updateLotteryInventory(lotteryItem.getInventory(), lotteryItem.getId());
+        // 插入抽奖记录数据
+        insertLotteryRecord(userId, activityId);
+
+        return lotteryItem;
+    }
+
+    /**
+     * @Author yhx
+     * @Description 用户抽奖,使用redis分布式锁防止mysql库存超卖(含redis缓存,存在数据不一致问题)
      * @Date 10:17 2022/1/11
      * @param userId
      * @param activityId
@@ -84,13 +177,13 @@ public class LotteryServiceImpl implements LotteryService {
 
     /**
      * @Author yhx
-     * @Description 抽取奖项
+     * @Description (含redis缓存, 可能存在redis与mysql数据不一致情况)抽取奖项
      * @Date 14:42 2022/1/12
      * @param activityId
      * @param redisLotteriesKey
      * @return com.demo.spring_redis.entity.Lottery
      **/
-    public Lottery LotteryOnePrize(Long activityId, String redisLotteriesKey){
+    public Lottery LotteryOnePrize(Long activityId, String redisLotteriesKey) {
 
         HashOperations hashOperations = redisTemplate.opsForHash();
         // 待读取的数据
@@ -265,6 +358,18 @@ public class LotteryServiceImpl implements LotteryService {
     public List<LotteryRecord> selectAllLotteryUser(Long activityId){
         //获得参与抽奖的所有用户
         return lotteryRecordMapper.selectByActivityIdLotteryRecord(activityId);
+    }
+
+    /**
+     * @Author yhx
+     * @Description 查询某活动所有奖项
+     * @Date 10:12 2022/1/14
+     * @param activityId
+     * @return java.util.List<com.demo.spring_redis.entity.Lottery>
+     **/
+    @Override
+    public List<Lottery> selectByActivityIdLotteries(Long activityId) {
+        return lotteryMapper.selectByActivityIdLotteries(activityId);
     }
 
 }

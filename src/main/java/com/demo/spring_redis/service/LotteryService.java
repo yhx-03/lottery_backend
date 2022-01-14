@@ -15,7 +15,11 @@ public interface LotteryService {
 
 //    List<LotteryUser> selectAll(Long activityId);
 
+    Lottery userLotteryDirect(Long userId, Long activityId);
+
     Lottery userLottery(Long userId, Long activityId);
 
     List<LotteryRecord> selectAllLotteryUser(Long activityId);
+
+    List<Lottery> selectByActivityIdLotteries(Long activityId);
 }
