@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -85,6 +84,8 @@ public class LotteryServiceImpl implements LotteryService {
         // 2.筛选出所有有库存的商品
         // 3.通过概率实现随机抽奖
         // 4.减库存,插记录
+
+
         Lottery defaultLottery = lotteryMapper.selectByActivityIdDefaultLotteries(activityId);
         if  (defaultLottery != null) {
             return LotteryOnePrizeDirectWithDefault(defaultLottery, userId, activityId);
